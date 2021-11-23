@@ -60,7 +60,7 @@ flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statist
 To create a profile run:
 
 ```
-python -m cProfile -o solve.prof solve.py -n 10 4
+python3 -m cProfile -o solve.prof solve.py -n 10 4
 ```
 
 This creates a file called `solve.prof` that can then be inspected through:
