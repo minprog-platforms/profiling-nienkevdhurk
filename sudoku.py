@@ -1,30 +1,60 @@
 from __future__ import annotations
-from typing import Iterable
+from typing import Iterable, ValuesView
 
 
 class Sudoku:
     """A mutable sudoku puzzle."""
 
     def __init__(self, puzzle: Iterable[Iterable]):
-        self._grid: list[int] = []
+        self._grid: list[list[int]] = []
+        self._grid_column: list[list[int]] = []
+        self._grid_block: list[list[int]] = []
 
+        # Save sudoku row wise
         for puzzle_row in puzzle:
             row = []
             for element in puzzle_row:
                 row.append(int(element))
-
             self._grid.append(row)
+        
+        # Save sudoku column wise
+        for i in range(9):
+            column = []
+            for row in self._grid:
+                column.append(row[i])   
+            self._grid_column.append(column)
+
+        # Save sudoku block wise
+        for i in range(9):
+            x_start = (i % 3) * 3
+            y_start = (i // 3) * 3
+            block = []
+            for x in range(x_start, x_start + 3):
+                for y in range(y_start, y_start + 3):
+                    block.append(self._grid[y][x])
+            self._grid_block.append(block)
 
     def place(self, value: int, x: int, y: int) -> None:
         """Place value at x,y."""
         self._grid[y][x] = value
+        self._grid_column[x][y] = value
+
+        block_value = x // 3 + y // 3 * 3
+        block_index = x % 3 * 3 + y % 3
+        self._grid_block[block_value][block_index] = value
 
     def unplace(self, x: int, y: int) -> None:
         """Remove (unplace) a number at x,y."""
         self._grid[y][x] = 0
+        self._grid_column[x][y] = 0
+
+        block_value = x // 3 + y // 3 * 3
+        block_index = x % 3 * 3 + y % 3
+        self._grid_block[block_value][block_index] = 0
 
     def value_at(self, x: int, y: int) -> int:
         """Returns the value at x,y."""
+
         return self._grid[y][x]
 
     def options_at(self, x: int, y: int) -> Iterable[int]:
@@ -35,9 +65,9 @@ class Sudoku:
         block_index = (y // 3) * 3 + x // 3
 
         # Remove all values from the row, column and block
-        options = list(options - set(self.row_values(y)) - set(self.column_values(x)) - set(self.block_values(block_index)))
+        remaining = list(options - set(self.row_values(y)) - set(self.column_values(x)) - set(self.block_values(block_index)))
 
-        return options
+        return remaining
 
     def next_empty_index(self) -> tuple[int, int]:
         """
@@ -45,27 +75,25 @@ class Sudoku:
         If there is no empty spot, returns (-1,-1)
         """
         next_x, next_y = -1, -1
-
+        
         for y in range(9):
-            for x in range(9):
-                if self._grid[y][x] == 0 and next_x == -1 and next_y == -1:
-                    next_x, next_y = x, y
-                    return next_x, next_y
+            row = self._grid[y]
+            if 0 in row:
+                for x in range(9):
+                    if row[x] == 0 and next_x == -1 and next_y == -1:
+                        return x, y
 
-        return next_x, next_y
+        return -1, -1
 
     def row_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th row."""
+
         return self._grid[i]
 
     def column_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th column."""
-        values = []
 
-        for row in self._grid:
-            values.append(row[i])
-
-        return values
+        return self._grid_column[i]
 
     def block_values(self, i: int) -> Iterable[int]:
         """
@@ -75,16 +103,8 @@ class Sudoku:
         3 4 5
         6 7 8
         """
-        values = []
 
-        x_start = (i % 3) * 3
-        y_start = (i // 3) * 3
-
-        for x in range(x_start, x_start + 3):
-            for y in range(y_start, y_start + 3):
-                values.append(self._grid[y][x])
-        
-        return values
+        return self._grid_block[i]
 
     def is_solved(self) -> bool:
         """
