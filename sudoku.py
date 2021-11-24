@@ -44,6 +44,7 @@ class Sudoku:
 
     def place(self, value: int, x: int, y: int) -> None:
         """Place value at x,y."""
+        # Place values
         self._grid[y][x] = value
         self._grid_column[x][y] = value
 
@@ -51,10 +52,12 @@ class Sudoku:
         block_index = x % 3 * 3 + y % 3
         self._grid_block[block_value][block_index] = value
 
+        # counts the zeroes filled in
         self._count += 1
 
     def unplace(self, x: int, y: int) -> None:
         """Remove (unplace) a number at x,y."""
+        # Remove values
         self._grid[y][x] = 0
         self._grid_column[x][y] = 0
 
@@ -62,6 +65,7 @@ class Sudoku:
         block_index = x % 3 * 3 + y % 3
         self._grid_block[block_value][block_index] = 0
 
+        # Goes back to previous zero
         self._count -= 1
 
     def value_at(self, x: int, y: int) -> int:
@@ -89,7 +93,8 @@ class Sudoku:
         while self._count < len(self._zeroes):
             next = self._zeroes[self._count]
             return next[1], next[0]
-
+        return -1, -1
+        
     def row_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th row."""
 
