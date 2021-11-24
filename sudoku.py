@@ -9,6 +9,8 @@ class Sudoku:
         self._grid: list[list[int]] = []
         self._grid_column: list[list[int]] = []
         self._grid_block: list[list[int]] = []
+        self._zeroes: list[list[int]] = []
+        self._count: int = 0
 
         # Save sudoku row wise
         for puzzle_row in puzzle:
@@ -33,6 +35,12 @@ class Sudoku:
                 for y in range(y_start, y_start + 3):
                     block.append(self._grid[y][x])
             self._grid_block.append(block)
+        
+        # Save location of 0 values
+        for x in range(9):
+            for y in range(9):
+                if self._grid[y][x] == 0:
+                    self._zeroes.append([y, x])
 
     def place(self, value: int, x: int, y: int) -> None:
         """Place value at x,y."""
@@ -43,6 +51,8 @@ class Sudoku:
         block_index = x % 3 * 3 + y % 3
         self._grid_block[block_value][block_index] = value
 
+        self._count += 1
+
     def unplace(self, x: int, y: int) -> None:
         """Remove (unplace) a number at x,y."""
         self._grid[y][x] = 0
@@ -51,6 +61,8 @@ class Sudoku:
         block_value = x // 3 + y // 3 * 3
         block_index = x % 3 * 3 + y % 3
         self._grid_block[block_value][block_index] = 0
+
+        self._count -= 1
 
     def value_at(self, x: int, y: int) -> int:
         """Returns the value at x,y."""
@@ -73,17 +85,10 @@ class Sudoku:
         """
         Returns the next index (x,y) that is empty (value 0).
         If there is no empty spot, returns (-1,-1)
-        """
-        next_x, next_y = -1, -1
-        
-        for y in range(9):
-            row = self._grid[y]
-            if 0 in row:
-                for x in range(9):
-                    if row[x] == 0 and next_x == -1 and next_y == -1:
-                        return x, y
-
-        return -1, -1
+        """        
+        while self._count < len(self._zeroes):
+            next = self._zeroes[self._count]
+            return next[1], next[0]
 
     def row_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th row."""
