@@ -39,8 +39,8 @@ class Sudoku:
         # Save location of 0 values
         for x in range(9):
             for y in range(9):
-                if self._grid[y][x] == 0:
-                    self._zeroes.append([y, x])
+                if self._grid[x][y] == 0:
+                    self._zeroes.append([x, y])
 
     def place(self, value: int, x: int, y: int) -> None:
         """Place value at x,y."""
@@ -94,7 +94,7 @@ class Sudoku:
             next = self._zeroes[self._count]
             return next[1], next[0]
         return -1, -1
-        
+
     def row_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th row."""
 
